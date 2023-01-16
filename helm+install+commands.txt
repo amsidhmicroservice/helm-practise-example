@@ -1,0 +1,140 @@
+helm repo list
+
+helm repo add bitnami https://charts.bitnami.com/bitnami
+
+helm repo list
+
+helm repo remove bitnami
+
+helm repo add bitnami https://charts.bitnami.com/bitnami
+
+
+Search the repository:
+
+helm search repo mysql
+
+helm search repo database
+
+helm search repo database --versions
+
+
+Install a package:
+
+kubectl get pods
+
+(Below Two commands - In a Different Shell/Commandline window/tab)
+
+minikube ssh
+
+docker images
+
+helm install mydb bitnami/mysql
+
+Check the cluster:
+
+kubectl get pods
+
+minikube ssh
+
+docker images
+
+To check the installation status:
+
+helm status mydb
+
+
+
+--------------------------------------------
+
+To Upgrade:
+
+ROOT_PASSWORD=$(kubectl get secret --namespace default mydb-mysql -o jsonpath="{.data.mysql-root-password}" | base64 --decode)
+
+helm upgrade --namespace default mysql-release bitnami/mysql --set auth.rootPassword=$ROOT_PASSWORD
+
+-------
+
+helm uninstall mysql-release
+
+
+Helm More advance command:
+### Helm Workflow->
+  When you do helm install mysql bitnami/mysql --values values.yaml then following action will happen.
+  1) Load the chart and it's dependencies
+  2) Parse the values.yaml file
+  3) Generate the resource manifest yaml files
+  4) Parse the yaml to current installed kubernetes version objects and validate against it.
+  5) Generate yaml and send to kubernetes
+So in default helm will not wait to complete the deployment by kubernetes
+
+In order to tell helm to wait until deployment happen then do the following command
+
+--- helm install mysql bitnami/mysql --values values.yaml --wait --timeout 10m30s     //default wait timeout is 5 minutes
+
+In order to tell helm not to send the manifest files to kubernetes(skip step 5 but still kube control must be running for generating manifest file) and just generate the yaml then use the following command
+--- helm install mysql bitnami/mysql --values values.yaml --dry-run
+
+Instead of --dry-run it is recommended to use helm template( as it does not require kubecontrol to be running)
+--- helm template mysql bitnami/mysql --values values.yaml
+
+--- helm get notes mysql
+--- helm get values mysql
+--- helm get values webserver --all
+--- helm get values webserver --all --revision 1
+--- helm get notes mysql --revision 1
+--- helm get notes mysql --revision 2
+--- helm get manifest mysql
+--- helm get manifest mysql --revision 1
+--- helm get manifest mysql --revision 2
+
+-- helm history mysql
+
+-- helm rollback mysql 2
+
+Default helm uninstall command will delete the all history and secrets created for release version. In order to keep the history and secrets use following command
+--- helm uninstall webserver --keep-history
+
+--- helm rollback webserver 2
+
+Create namespace along with helm install command
+--- helm install webserver bitnami/tomcat --values values.yaml --namespace web
+This will fail if there is not namespace web present before this command
+--- helm install webserver bitnami/tomcat --values values.yaml --namespace web --create-namespace
+
+Helm upgrade or install command together. This command will try to upgrade if given helm instance already present else install the new one.
+--- helm upgrade --install webserver bitnami/tomcat --values values.yaml
+--- helm upgrade --install webserver bitnami/tomcat --values values.yaml
+
+Generate instance name automatically in helm
+--- helm install --generate-name bitnami/tomcat --values values.yaml
+
+Generate instance name automatically with given template in helm
+--- helm install --generate-name bitnami/tomcat --values values.yaml --name-template "webserver--{{randAlpha 7 | lower}}"
+
+If helm installation is failed then if we want to go for previous successful release then use following command
+--- helm install webserver bitnami/tomcat --values values.yaml --atomic --timeout 10m30s
+This will wait for 10 minutes 30 seconds to complete the installation else mark the current installation as fail and rollback the
+instance to previous successful release
+
+Tell helm to clean up all resource if installation is failed
+
+helm upgrade webserver bitnami/tomcat --cleanup-on-fail
+
+
+Create our own chart using helm
+--- helm create firstchart
+--- helm install firstchart
+To compile our chart files use following command
+--- helm link firstchart
+
+Pull chart from repo
+--- helm pull gitrepo/myapp3chart
+
+
+
+
+
+
+
+
+

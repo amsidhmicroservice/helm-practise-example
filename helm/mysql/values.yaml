@@ -1,0 +1,6 @@
+auth:
+  rootPassword: Test123
+  createDatabase: true
+  database: mydb
+  username: myuser
+  password: mypassword

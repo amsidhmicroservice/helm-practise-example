@@ -1,0 +1,5 @@
+tomcatPassword: BMOSWgp8SW
+service:
+  type: LoadBalancer
+image:
+  pullPolicy: Never
