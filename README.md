@@ -34,4 +34,47 @@ On Docker hub
 helm push myapp3chart-0.1.0.tgz oci://registry-1.docker.io/amsidhmicroservice
 helm show all oci://registry-1.docker.io/amsidhmicroservice/myappchart --version 0.1.0
 helm template oci://registry-1.docker.io/amsidhmicroservice/myapp2chart --version 0.1.0
-helm show all oci://registry-1.docker.io/amsidhmicroservice/myappchart
+helm show all oci://registry-1.docker.io/amsidhmicroservice/myappchart --version 0.1.0
+
+
+### Securing the image using GPG
+Install GPG from https://gnupg.org/download/
+Check installation using 
+--- gpg --version
+Generate the GPG key using following command.
+--- gpg --full-generate-key
+Generated keys are stored in directory  C:\Users\amsid\AppData\Roaming\gnupg\
+Key extension files are .kbx. For helm we need to export these key in gpg format using following command.
+--- gpg --export-secret-keys > C:\Users\amsid\AppData\Roaming\gnupg\secring.gpg
+
+Create a sample chart
+--- helm create firstchart
+Now package the helm chart using above gpg key file
+--- helm package --sign --key amsidhlokhande@gmail.com --keyring C:\Users\amsid\AppData\Roaming\gnupg\secring.pgp firstchart -d chartsrepo
+--- helm repo index chartsrepo
+
+Install python3 and launch web server using command from the chartsrepo.
+--- python3 --version
+--- python3 -m http.server --bind 127.0.0.1 8080
+
+check http://localhost:8080 and see the charts are available there 
+![pyton3-web-server.png](pyton3-web-server.png)
+
+add the repository to local helm.
+
+helm repo ls
+helm repo add localrepo http://localhost:8080
+--- helm install --verify --keyring C:\Users\amsid\AppData\Roaming\gnupg\secring.pgp firstchart localrepo/firstchart
+
+
+
+
+
+
+
+
+
+
+
+
+
